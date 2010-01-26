@@ -1,0 +1,60 @@
+#!/bin/bash
+
+function prepare_adhoc_package()
+{
+  if [ ${#} -eq 1 ]; then
+    BASE_NAME="${1}"
+  else
+    BASE_NAME="${PROJECT}"
+  fi
+
+  PAYLOAD_FOLDER="${ARCHIVE_FOLDER}/Payload"
+  mkdir -p "${PAYLOAD_FOLDER}"
+
+  if [ -d "${ARCHIVE_FOLDER}/${BASE_NAME}.app" ]; then
+    cp -rp "${ARCHIVE_FOLDER}/${BASE_NAME}.app" "${PAYLOAD_FOLDER}"
+    cp "${ARCHIVE_FOLDER}/${BASE_NAME}.app/iTunesArtwork" "${ARCHIVE_FOLDER}"
+    (cd "${ARCHIVE_FOLDER}"; zip -qr "${BASE_NAME}.ipa" iTunesArtwork Payload)
+  else
+    for app in "${ARCHIVE_FOLDER}/*.app"; do
+      cp -rp "${app}" "${PAYLOAD_FOLDER}"
+      cp -rp "${app}/iTunesArtwork" "${ARCHIVE_FOLDER}"
+    done
+
+    (cd "${ARCHIVE_FOLDER}"; zip -qr "${BASE_NAME}.ipa" iTunesArtwork Payload)
+  fi
+
+  rm -rf "${ARCHIVE_FOLDER}/iTunesArtwork" "${PAYLOAD_FOLDER}"
+
+  open "${ARCHIVE_FOLDER}"
+}
+
+function archive_dsym_iphoneos()
+{
+  case ${CONFIGURATION} in
+    *Distribution*) : ;;
+    *)              return ;;
+  esac
+
+  ARCHIVE_ROOT="${HOME}/projects/dSYMArchive/${PROJECT_NAME}"
+  ARCHIVE_DATE=`date +"%Y%m%d-%H%M%S"`
+
+  echo "Archiving ${CONFIGURATION} in ${ARCHIVE_ROOT} at ${ARCHIVE_DATE}" >> /tmp/archive_dsym.out
+
+  ARCHIVE_CONFIG_FOLDER="${ARCHIVE_ROOT}/${CONFIGURATION}"
+  mkdir -p -v "${ARCHIVE_CONFIG_FOLDER}" >> /tmp/archive_dsym.out
+  ARCHIVE_FOLDER="${ARCHIVE_CONFIG_FOLDER}/${ARCHIVE_DATE}"
+  echo "Copying ${DWARF_DSYM_FOLDER_PATH} to ${ARCHIVE_FOLDER}" >> /tmp/archive_dsym.out
+  cp -Rp ${DWARF_DSYM_FOLDER_PATH} ${ARCHIVE_FOLDER} >> /tmp/archive_dsym.out
+
+  case ${CONFIGURATION} in
+    *[Bb]eta*)  prepare_adhoc_package "${1}" ;;
+    *)          return ;;
+  esac
+}
+
+case @${SDK_NAME} in
+  @iphoneos*)   archive_dsym_iphoneos "${1}" ;;
+  @*)           : ;;
+  @)            echo "Not running under Xcode." ;;
+esac
