@@ -16,15 +16,13 @@ function prepare_adhoc_package()
   if [ -d "${ARCHIVE_FOLDER}/${BASE_NAME}.app" ]; then
     cp -rp "${ARCHIVE_FOLDER}/${BASE_NAME}.app" "${PAYLOAD_FOLDER}"
     cp "${ARCHIVE_FOLDER}/${BASE_NAME}.app/iTunesArtwork" "${ARCHIVE_FOLDER}"
-    (cd "${ARCHIVE_FOLDER}"; zip -qr "${BASE_NAME}.ipa" iTunesArtwork Payload)
   else
     for app in "${ARCHIVE_FOLDER}/*.app"; do
       cp -rp "${app}" "${PAYLOAD_FOLDER}"
       cp -rp "${app}/iTunesArtwork" "${ARCHIVE_FOLDER}"
     done
-
-    (cd "${ARCHIVE_FOLDER}"; zip -qr "${BASE_NAME}.ipa" iTunesArtwork Payload)
   fi
+  (cd "${ARCHIVE_FOLDER}"; zip -qr "${BASE_NAME}.ipa" iTunesArtwork Payload)
 
   rm -rf "${ARCHIVE_FOLDER}/iTunesArtwork" "${PAYLOAD_FOLDER}"
 
