@@ -21,7 +21,7 @@ is not to your liking. This location _must_ be in a location accessible to
 spotlight.
 
 See a presentation I gave at TACOW in January 2010 for more information (slides
-17-24). [Solving Little Problems][http://www.slideshare.net/halostatue/solving-little-things/17]
+17-24). [Solving Little Problems][1]
 
 ## Installation
 
@@ -53,21 +53,21 @@ variables from Xcode to provide most of the magic involved.
    `iphoneos`, the script does nothing (and prints an error if you run the
    script outside of Xcode).
 
-      case @${SDK_NAME} in
-        @iphoneos*)   archive_dsym_iphoneos "${1}" ;;
-        @*)           : ;;
-        @)            echo "Not running under Xcode." ;;
-      esac
+        case @${SDK_NAME} in
+          @iphoneos*)   archive_dsym_iphoneos "${1}" ;;
+          @*)           : ;;
+          @)            echo "Not running under Xcode." ;;
+        esac
 
 2. If you're building an iPhone OS project, and you're running a build
    `CONFIGURATION` containing the term `Distribution`, it copies the dSYM
    debugging symbols from their target folder (`DWARF_DSYM_FOLDER_PATH`) to the
    `ARCHIVE_FOLDDER` (described above).
 
-      case ${CONFIGURATION} in
-        *Distribution*) : ;;
-        *)              return ;;
-      esac
+        case ${CONFIGURATION} in
+          *Distribution*) : ;;
+          *)              return ;;
+        esac
 
 3. If step two has run, the script checks to see if you are using a `Beta` (or
    `beta`) build `CONFIGURATION`. If you are, the `.app` folders are copied to
@@ -75,8 +75,9 @@ variables from Xcode to provide most of the magic involved.
    folder, this is copied out as well. These are then zipped into an `.ipa`
    archive and the `ARCHIVE_FOLDER` is opened in iTunes.
 
-      case ${CONFIGURATION} in
-        *[Bb]eta*)  prepare_adhoc_package "${1}" ;;
-        *)          return ;;
-      esac
+        case ${CONFIGURATION} in
+          *[Bb]eta*)  prepare_adhoc_package "${1}" ;;
+          *)          return ;;
+        esac
 
+[1]: http://www.slideshare.net/halostatue/solving-little-things/17 Solving Little Problems Slide 17
