@@ -1,4 +1,4 @@
-# dsym-archiver README
+# `dsym-archiver` README
 
 > As written, this script is for iPhone OS only. Modifications are required for
 > Mac OS X support (mostly removing the adhoc packaging) and to fix the
@@ -15,6 +15,13 @@ By default, the dSYM bundle will be copied to and the `.ipa` will be created in
   `${HOME}/dSYMArchive/`;
 * `PROJECT_NAME` and `CONFIGURATION` are values provided by Xcode.
 * `ARCHIVE_DATE` is the archive time in `YYYYMMDD-hhmmss` format.
+
+You may change `ARCHIVE_BASE` at the top of the script if `${HOME}/dsymArchive`
+is not to your liking. This location _must_ be in a location accessible to
+spotlight.
+
+See a presentation I gave at TACOW in January 2010 for more information (slides
+17-24). [http://www.slideshare.net/halostatue/solving-little-things/17][Solving Little Problems] 
 
 ## Installation
 
@@ -38,3 +45,35 @@ This new aggregate target should now be made your default build target to
 obtain best results.
 
 ## What `dsym-archiver` Does
+
+This script is fairly simple, but fairly verbose because it's using environment
+variables from Xcode to provide most of the magic involved.
+
+1. If this build script is run and the `SDK_NAME` does not start with
+   `iphoneos`, the script does nothing (and prints an error if you run the
+   script outside of Xcode).
+
+    case @${SDK_NAME} in
+      @iphoneos*)   archive_dsym_iphoneos "${1}" ;;
+      @*)           : ;;
+      @)            echo "Not running under Xcode." ;;
+    esac
+2. If you're building an iPhone OS project, and you're running a build
+   `CONFIGURATION` containing the term `Distribution`, it copies the dSYM
+   debugging symbols from their target folder (`DWARF_DSYM_FOLDER_PATH`) to the
+   `ARCHIVE_FOLDDER` (described above).
+
+    case ${CONFIGURATION} in
+      *Distribution*) : ;;
+      *)              return ;;
+    esac
+3. If step two has run, the script checks to see if you are using a `Beta` (or
+   `beta`) build `CONFIGURATION`. If you are, the `.app` folders are copied to
+   a temporary location; if there is an `iTunesArtwork` file in the `.app`
+   folder, this is copied out as well. These are then zipped into an `.ipa`
+   archive and the `ARCHIVE_FOLDER` is opened in iTunes.
+
+    case ${CONFIGURATION} in
+      *[Bb]eta*)  prepare_adhoc_package "${1}" ;;
+      *)          return ;;
+    esac
