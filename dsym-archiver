@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ARCHIVE_BASE="${HOME}/dSYMArchive/"
+
 function prepare_adhoc_package()
 {
   if [ ${#} -eq 1 ]; then
@@ -36,7 +38,7 @@ function archive_dsym_iphoneos()
     *)              return ;;
   esac
 
-  ARCHIVE_ROOT="${HOME}/projects/dSYMArchive/${PROJECT_NAME}"
+  ARCHIVE_ROOT="${ARCHIVE_BASE}/${PROJECT_NAME}"
   ARCHIVE_DATE=`date +"%Y%m%d-%H%M%S"`
 
   echo "Archiving ${CONFIGURATION} in ${ARCHIVE_ROOT} at ${ARCHIVE_DATE}" >> /tmp/archive_dsym.out
